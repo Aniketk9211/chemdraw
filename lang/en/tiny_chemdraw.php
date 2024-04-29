@@ -25,8 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Chemical Structure Drawing Tool';
-$string['button_startMolDraw'] = 'Start MOL Draw';
-$string['menuitem_startMolDraw'] = 'Start MOL Draw';
+$string['pluginName'] = 'chemdraw';
+$string['buttonName'] = 'ChemDoodle';
 $string['privacy:metadata'] = 'Chemical Structure Editor does not store any personal data';
-$string['sketchtitle'] = 'Chemical Structure Editor';
+$string['sketchTitle'] = 'ChemDoodle Editor';

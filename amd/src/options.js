@@ -21,12 +21,36 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-const component = 'tiny_chemdraw';
+import {
+    getPluginOptionName
+}
+from 'editor_tiny/options';
+import {
+    pluginName
+}
+from './common';
 
-export default {
-    component,
-    pluginName: `${component}/plugin`,
-    icon: component,
-    buttonName: `ChemDraw`
+// Helper variables for the option names.
+const showPlugin = getPluginOptionName(pluginName, 'showplugin');
 
+/**
+ * Options registration function.
+ *
+ * @param {tinyMCE} editor
+ */
+export const register = (editor) => {
+    const registerOption = editor.options.register;
+
+    registerOption(showPlugin, {
+        processor: 'boolean',
+        "default": true,
+    });
 };
+
+/**
+ * Fetch the myFirstProperty value for this editor instance.
+ *
+ * @param {tinyMCE} editor The editor instance to fetch the value for
+ * @returns {object} The value of the myFirstProperty option
+ */
+export const isPluginVisible = (editor) => editor.options.get(showPlugin);

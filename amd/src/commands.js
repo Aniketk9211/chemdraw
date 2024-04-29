@@ -7,11 +7,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Commands helper for the Moodle tiny_chemdraw plugin.
@@ -23,49 +23,53 @@
 
 import {getButtonImage} from "editor_tiny/utils";
 import {get_string as getString} from "core/str";
-import {handleAction} from "./ui";
-import {component, startMolDrawButtonName, startMolDrawMenuItemName, icon} from "./common";
+import {component, icon} from "./common";
+import {ChemEmbed, insert} from "./ui";
+import {notify} from 'core/notification';
 
-/**
- * Handle the action for your plugin.
- * @param {TinyMCE.editor} editor The tinyMCE editor instance.
- */
-// handle Action funciton..
+const handleAction = async(editor) => {
+  const chemImage = new ChemEmbed(editor);
+  chemImage.init();
 
+  const insertButton = document.getElementById('insertButton');
 
-/**
- * Get the setup function for the buttons.
- *
- * This is performed in an async function which ultimately returns the registration function as the
- * Tiny.AddOnManager.Add() function does not support async functions.
- *
- * @returns {function} The registration function to call within the Plugin.add function.
- */
+  if (insertButton) {
+    insertButton.addEventListener('click', insert);
+  } else {
+    notify.addNotification({
+      type: 'error',
+      message: 'Insert button not found in the DOM.'
+    });
+  }
+
+};
+
 export const getSetup = async() => {
-    try {
-      const [startMolDrawButtonNameTitle, startMolDrawMenuItemNameTitle, buttonImage] = await Promise.all([
-        getString("button_startMolDraw", component),
-        getString("menuitem_startMolDraw", component),
-        getButtonImage("icon", component),
-      ]);
-  
-      return (editor) => {
-        editor.ui.registry.addIcon(icon, buttonImage.html);
-  
-        editor.ui.registry.addButton(startMolDrawButtonName, {
-          icon,
-          tooltip: startMolDrawButtonNameTitle,
-          onAction: () => handleAction(editor),
-        });
-  
-        editor.ui.registry.addMenuItem(startMolDrawMenuItemName, {
-          icon,
-          text: startMolDrawMenuItemNameTitle,
-          onAction: () => handleAction(editor),
-        });
-      };
-    } catch (error) {
-      // eslint-disable-next-line no-alert
-      alert("Error setting up plugin:", error);
-    }
-  };
+  try {
+    const buttonName = await getString("buttonName", component);
+    const buttonImage = await getButtonImage("icon", component);
+
+    return (editor) => {
+      editor.ui.registry.addIcon(icon, buttonImage.html);
+
+      editor.ui.registry.addButton(buttonName, {
+        icon,
+        tooltip: buttonName,
+        onAction: () => handleAction(editor),
+      });
+
+      editor.ui.registry.addMenuItem(buttonName, {
+        icon,
+        text: buttonName,
+        onAction: () => handleAction(editor),
+      });
+    };
+
+  } catch (error) {
+    notify.addNotification({
+      type: 'error',
+      message: 'Error setting up the tiny_chemdraw plugin: ' + error.message
+    });
+    return null;
+  }
+};

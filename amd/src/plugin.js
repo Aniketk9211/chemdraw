@@ -21,33 +21,31 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import { getTinyMCE } from 'editor_tiny/loader';
-import { getPluginMetadata } from 'editor_tiny/utils';
-
-import { component, pluginName } from './common';
-import { register as registerOptions } from './options';
-import { getSetup as getCommandSetup } from './commands';
+import {getTinyMCE} from 'editor_tiny/loader';
+import {getPluginMetadata} from 'editor_tiny/utils';
+import {component, pluginName} from './common';
+import {register as registerOptions} from './options';
+import {getSetup as getCommandSetup} from './commands';
 import * as Configuration from './configuration';
 
 // Setup the tiny_moldraw Plugin.
 export default new Promise((resolve) => {
-    Promise.all([
-        getTinyMCE(),
-        getPluginMetadata(component, pluginName),
-        getCommandSetup(),
-    ]).then(([tinyMCE, pluginMetadata, setupCommands]) => {
-        // Register the plugin with TinyMCE
-        tinyMCE.PluginManager.add(pluginName, (editor) => {
-            // Register any options that your plugin has
-            registerOptions(editor);
+    const [tinyMCE, pluginMetadata, setupCommands] = Promise.all([
+      getTinyMCE(),
+      getPluginMetadata(component, pluginName),
+      getCommandSetup(),
+    ]);
 
-            // Setup any commands such as buttons, menu items, and so on.
-            setupCommands(editor);
+    tinyMCE.PluginManager.add(pluginName, (editor) => {
+      // Register any options that your plugin has
+      registerOptions(editor);
 
-            // Return the pluginMetadata object. This is used by TinyMCE to display a help link for your plugin.
-            return pluginMetadata;
-        });
+      // Setup any commands such as buttons, menu items, and so on.
+      setupCommands(editor);
 
-        resolve([pluginName, Configuration]);
+      // Return the pluginMetadata object. This is used by TinyMCE to display a help link for your plugin.
+      return pluginMetadata;
     });
-});
+
+    resolve([pluginName, Configuration]);
+  });
