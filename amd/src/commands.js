@@ -21,30 +21,30 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import {getButtonImage} from "editor_tiny/utils";
-import {get_string as getString} from "core/str";
-import {component, icon} from "./common";
-import {ChemEmbed, insert} from "./ui";
-import {notify} from 'core/notification';
+import { getButtonImage } from "editor_tiny/utils";
+import { get_string as getString } from "core/str";
 
-const handleAction = async(editor) => {
+import { component, icon } from "./common";
+import { ChemEmbed, insert } from "./ui";
+import { notify } from "core/notification";
+
+const handleAction = async (editor) => {
   const chemImage = new ChemEmbed(editor);
   chemImage.init();
 
-  const insertButton = document.getElementById('insertButton');
+  const insertButton = document.getElementById("insertButton");
 
   if (insertButton) {
-    insertButton.addEventListener('click', insert);
+    insertButton.addEventListener("click", insert);
   } else {
     notify.addNotification({
-      type: 'error',
-      message: 'Insert button not found in the DOM.'
+      type: "error",
+      message: "Insert button not found in the DOM.",
     });
   }
-
 };
 
-export const getSetup = async() => {
+export const getSetup = async () => {
   try {
     const buttonName = await getString("buttonName", component);
     const buttonImage = await getButtonImage("icon", component);
@@ -63,12 +63,42 @@ export const getSetup = async() => {
         text: buttonName,
         onAction: () => handleAction(editor),
       });
-    };
 
+      // editor.ui.registry.addToggleButton(buttonName, {
+      //   icon,
+      //   tooltip: buttonName,
+      //   onAction: () => handleAction(editor, window.json),
+      //   onSetup: (api) => {
+      //     return editor.selection.selectorChangedWithUnbind(
+      //       "img:not([data-mce-object]):not([data-mce-placeholder]),figure.image",
+      //       function () {
+      //         var node = editor.selection.getNode();
+      //         var parentNode = node.parentNode;
+      //         const html = editor.serializer.serialize(parentNode);
+      //         const commentMatch = html.match(/<!--(.*?)-->/);
+      //         if (commentMatch) {
+      //           try {
+      //             var json = JSON.parse(commentMatch[1]);
+      //             // If the comment contains valid JSON, call api.setActive and store the JSON
+      //             api.setActive(true);
+      //             window.json = JSON.stringify(json); // Save the JSON to window.json
+      //           } catch (e) {
+      //             // If the comment does not contain valid JSON, call api.setActive with false
+      //             api.setActive(false);
+      //           }
+      //         } else {
+      //           api.setActive(false);
+      //         }
+      //       }
+      //     ).unbind;
+      //   },
+      // });
+    };
+    
   } catch (error) {
     notify.addNotification({
-      type: 'error',
-      message: 'Error setting up the tiny_chemdraw plugin: ' + error.message
+      type: "error",
+      message: "Error setting up the tiny_chemdraw plugin: " + error.message,
     });
     return null;
   }

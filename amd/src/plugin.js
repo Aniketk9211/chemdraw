@@ -1,3 +1,4 @@
+
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,38 +15,46 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Tiny tiny_chemdraw for Moodle.
+ * Tiny tiny_moldraw for Moodle.
  *
- * @module      plugintype_pluginname/plugin
+ * @module      tiny_chemdraw/plugin
  * @copyright   2024 Aniket Kumar <aniketkj9211@gmail.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 import {getTinyMCE} from 'editor_tiny/loader';
 import {getPluginMetadata} from 'editor_tiny/utils';
+
 import {component, pluginName} from './common';
 import {register as registerOptions} from './options';
 import {getSetup as getCommandSetup} from './commands';
 import * as Configuration from './configuration';
 
-// Setup the tiny_moldraw Plugin.
-export default new Promise((resolve) => {
-    const [tinyMCE, pluginMetadata, setupCommands] = Promise.all([
-      getTinyMCE(),
-      getPluginMetadata(component, pluginName),
-      getCommandSetup(),
+// Setup the tiny_chemdraw Plugin.
+export default new Promise(async(resolve) => {
+    // Note: The PluginManager.add function does not support asynchronous configuration.
+    // Perform any asynchronous configuration here, and then call the PluginManager.add function.
+    const [
+        tinyMCE,
+        pluginMetadata,
+        setupCommands,
+    ] = await Promise.all([
+        getTinyMCE(),
+        getPluginMetadata(component, pluginName),
+        getCommandSetup(),
     ]);
 
+    // Reminder: Any asynchronous code must be run before this point.
     tinyMCE.PluginManager.add(pluginName, (editor) => {
-      // Register any options that your plugin has
-      registerOptions(editor);
+        // Register any options that your plugin has
+        registerOptions(editor);
 
-      // Setup any commands such as buttons, menu items, and so on.
-      setupCommands(editor);
+        // Setup any commands such as buttons, menu items, and so on.
+        setupCommands(editor);
 
-      // Return the pluginMetadata object. This is used by TinyMCE to display a help link for your plugin.
-      return pluginMetadata;
+        // Return the pluginMetadata object. This is used by TinyMCE to display a help link for your plugin.
+        return pluginMetadata;
     });
 
     resolve([pluginName, Configuration]);
-  });
+});

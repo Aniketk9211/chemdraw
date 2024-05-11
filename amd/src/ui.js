@@ -21,12 +21,11 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import {get_string as getString} from 'core/str';
-import Templates from 'core/templates';
-import Modal from 'core/modal';
-import Config from 'core/config';
-import {exception as displayException} from 'core/notification';
-
+import { get_string as getString } from "core/str";
+import Templates from "core/templates";
+import Modal from "core/modal";
+import Config from "core/config";
+import { exception as displayException } from "core/notification";
 
 export const ChemEmbed = class {
   editor = null;
@@ -34,17 +33,22 @@ export const ChemEmbed = class {
     this.editor = editor;
   }
 
-  loadResource = async(url, type) => {
+  loadResource = async (url, type) => {
     return new Promise((resolve, reject) => {
-      const element = (type === "script") ? document.createElement("script") : document.createElement("link");
+      const element =
+        type === "script"
+          ? document.createElement("script")
+          : document.createElement("link");
       element.onload = resolve;
-      element.onerror = () => reject(new Error(`Failed to load ${type}: ${url}`));
+      element.onerror = () =>
+        reject(new Error(`Failed to load ${type}: ${url}`));
       if (type === "stylesheet") {
-        element.rel = 'stylesheet';
+        element.rel = "stylesheet";
         element.href = url;
       } else if (type === "script") {
-        element.src = url;}
-      document[type === "script" ? 'body' : 'head'].appendChild(element);
+        element.src = url;
+      }
+      document[type === "script" ? "body" : "head"].appendChild(element);
     });
   };
 
@@ -65,7 +69,11 @@ export const ChemEmbed = class {
       sketcher.styles.shapes_color = "#c10000";
       sketcher.repaint();
       // Preview ketcher initialization
-      const sketcherViewer = new ChemDoodle.ViewerCanvas("sketcher-viewer-atto", 100, 100);
+      const sketcherViewer = new ChemDoodle.ViewerCanvas(
+        "sketcher-viewer-atto",
+        100,
+        100
+      );
       sketcherViewer.emptyMessage = "No data loaded";
       sketcherViewer.styles.atoms_displayTerminalCarbonLabels_2D = true;
       sketcherViewer.styles.atoms_useJMOLColors = true;
@@ -86,70 +94,64 @@ export const ChemEmbed = class {
     }
   };
 
-  init = async() => {
+  init = async () => {
     try {
       const modal = await Modal.create({
-        title: getString('sketchtitle'),
+        title: getString("sketchtitle"),
         show: true,
         removeOnClose: true,
       });
-      Templates.renderForPromise('tiny_chemdraw/chemTemplate', {})
-        .then(async ({ html, js }) => {
+      Templates.renderForPromise("tiny_chemdraw/chemTemplate", {}).then(
+        async ({ html, js }) => {
           Templates.appendNodeContents(modal.getBody(), html, js);
           const resources = [
             `${Config.wwwroot}/lib/editor/tiny/plugins/chemdraw/ChemDoodle/install/ChemDoodleWeb.css`,
             `${Config.wwwroot}/lib/editor/tiny/plugins/chemdraw/ChemDoodle/install/uis/jquery-ui-1.11.4.css`,
             `${Config.wwwroot}/lib/editor/tiny/plugins/chemdraw/ChemDoodle/install/ChemDoodleWeb.js`,
             `${Config.wwwroot}/lib/editor/tiny/plugins/chemdraw/ChemDoodle/install/uis/ChemDoodleWeb-uis.js`,
-            `${Config.wwwroot}/lib/editor/tiny/plugins/chemdraw/chem/chem.css`
+            `${Config.wwwroot}/lib/editor/tiny/plugins/chemdraw/chem/chem.css`,
           ];
 
-          const types = ["stylesheet", "stylesheet", "script", "script", "stylesheet"];
+          const types = [
+            "stylesheet",
+            "stylesheet",
+            "script",
+            "script",
+            "stylesheet",
+          ];
 
           for (let i = 0; i < resources.length; i++) {
-            await loadResource(resources[i], types[i]);
+            await this.loadResource(resources[i], types[i]);
           }
 
           // Add this line to fix the model width.
-          window.parent.document.querySelector(".modal-dialog").style.maxWidth = '850px';
+          window.parent.document.querySelector(".modal-dialog").style.maxWidth =
+            "850px";
 
           // Load and run ChemDoodle functionality
-          await loadAndRunChemDoodle();
-        }) 
+          this.initializeChemDoodle();
+        }
+      );
     } catch (error) {
       displayException(error);
     }
   };
-}
+};
 
 export const insert = () => {
-  if (window.parent.tinyMCE && window.parent.tinyMCE.activeEditor) {
-    let mol = sketcherViewer.getMolecule();
-    let src = ChemDoodle.io.png.string(sketcherViewer);
-    let molFile = ChemDoodle.writeMOL(mol);
-    let width = document.getElementById('width_input_molstructure').valueAsNumber;
-    let height = document.getElementById('height_input_molstructure').valueAsNumber;
-    var content =
-      '<img src="' +
-      src +
-      '" width="' +
-      width +
-      'px" height="' +
-      height +
-      'px">';
+  let src = ChemDoodle.io.png.string(sketcherViewer);
+  let mol = sketcherViewer.getMolecule();
+  let molFile = ChemDoodle.writeMOL(mol);
 
-    window.parent.tinyMCE.activeEditor.execCommand(
-      "mceInsertContent",
-      0,
-      content
-    );
-    window.parent.tinyMCE.activeEditor.execCommand(
-      "mceInsertContent",
-      0,
-      "<!--" + molFile + "-->"
-    );
-    var modal = window.parent.document.querySelector('.modal');
-    var closeButton = modal.querySelector('.close');
+
+  if (window.parent.tinyMCE && window.parent.tinyMCE.activeEditor) {
+
+    var content = '<img src="' + src + '"';
+
+    window.parent.tinyMCE.activeEditor.execCommand("mceInsertContent", 0, content);
+    window.parent.tinyMCE.activeEditor.execCommand("mceInsertContent", 0, "<!--" + molFile + "-->" );
+    var modal = window.parent.document.querySelector(".modal");
+    var closeButton = modal.querySelector(".close");
     closeButton.click();
   }
   console.log("button Click");
